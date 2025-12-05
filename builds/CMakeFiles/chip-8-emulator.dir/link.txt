@@ -1,1 +1,1 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/chip-8-emulator.dir/link.d "CMakeFiles/chip-8-emulator.dir/src/main.c.o" -o chip-8-emulator  /usr/lib/libSDL3.so.0.2.26
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/chip-8-emulator.dir/link.d "CMakeFiles/chip-8-emulator.dir/src/main.c.o" "CMakeFiles/chip-8-emulator.dir/src/stack.c.o" -o chip-8-emulator  /usr/lib/libSDL3.so.0.2.26

@@ -3,6 +3,7 @@
 
 CMakeFiles/chip-8-emulator.dir/src/main.c.o
  /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/main.c
+ /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.h
  /usr/include/SDL3/SDL.h
  /usr/include/SDL3/SDL_assert.h
  /usr/include/SDL3/SDL_asyncio.h
