@@ -1,3 +1,9 @@
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_oldnames.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -48,7 +54,43 @@ uint8_t registerE = 0;
 uint8_t registerF = 0;
 
 int main() {
-  printf("This is the main function.\n");
-  printf("This is something extra to double check if it recompiled.\n");
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    fprintf(stderr, "SDL Init error: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  SDL_Window *win = SDL_CreateWindow("Chip_8_Emulator", 800, 600, 0);
+  if (!win) {
+    fprintf(stderr, "Window error: %s\n", SDL_GetError());
+  }
+
+  SDL_ShowWindow(win);
+  SDL_MaximizeWindow(win);
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(win, NULL);
+  if (!renderer) {
+    fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+    return 1;
+  }
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
+  SDL_RenderPresent(renderer);
+
+  int running = 1;
+  SDL_Event e;
+  while (running) {
+    while (SDL_PollEvent(&e)) {
+      if (e.type == SDL_EVENT_QUIT)
+        running = 0;
+    }
+
+    SDL_Delay(16);
+  }
+
+  SDL_DestroyWindow(win);
+  SDL_Quit();
   return 0;
 }

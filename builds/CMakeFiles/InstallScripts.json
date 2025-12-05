@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
