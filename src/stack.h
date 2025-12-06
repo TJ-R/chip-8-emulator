@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
-#define MAX_STACK_SIZE 100
+#define MAX_STACK_SIZE 16
 
 // Should be safe for 0xFFFF as error value for stack
 // since the stack should really only be returning 12-bit

@@ -100,7 +100,6 @@ uint16_t fetch_opcode(Chip8 *chip8)
 int cpu_loop(Chip8 *chip8)
 {
   uint16_t opcode = fetch_opcode(chip8);
-
   uint8_t opfamily = (opcode & 0xF000) >> 12;
   uint8_t X = (opcode & 0x0F00) >> 8;
   uint8_t Y = (opcode & 0x00F0) >> 4;
@@ -111,7 +110,23 @@ int cpu_loop(Chip8 *chip8)
   switch (opfamily)
   {
   case 0x0:
+    switch (N)
+    {
+    case 0x0:
+      // Clear the display
+      break;
+
+    // This opcode 0x00EE is returning from a subroutine
+    case 0xE:;
+      // Reason for ; is so that I can put declartion after label without
+      // warning
+      uint16_t addr = pop(&chip8->stack);
+      chip8->pc = addr;
+      break;
+    }
+
     break;
+
   case 0x1:
     break;
   case 0x2:

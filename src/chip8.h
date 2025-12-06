@@ -16,6 +16,7 @@ typedef struct Chip8
   uint8_t registers[CHIP8_REGISTER_COUNT];
   Stack stack;
   uint8_t memory[CHIP8_MEMORY_SIZE];
+  uint8_t gfx[64 * 32];
 } Chip8;
 
 void init(Chip8 *chip8);
