@@ -72,10 +72,24 @@ include CMakeFiles/chip-8-emulator.dir/flags.make
 CMakeFiles/chip-8-emulator.dir/codegen:
 .PHONY : CMakeFiles/chip-8-emulator.dir/codegen
 
+CMakeFiles/chip-8-emulator.dir/src/chip8.c.o: CMakeFiles/chip-8-emulator.dir/flags.make
+CMakeFiles/chip-8-emulator.dir/src/chip8.c.o: /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/chip8.c
+CMakeFiles/chip-8-emulator.dir/src/chip8.c.o: CMakeFiles/chip-8-emulator.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/chip-8-emulator.dir/src/chip8.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/chip-8-emulator.dir/src/chip8.c.o -MF CMakeFiles/chip-8-emulator.dir/src/chip8.c.o.d -o CMakeFiles/chip-8-emulator.dir/src/chip8.c.o -c /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/chip8.c
+
+CMakeFiles/chip-8-emulator.dir/src/chip8.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/chip-8-emulator.dir/src/chip8.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/chip8.c > CMakeFiles/chip-8-emulator.dir/src/chip8.c.i
+
+CMakeFiles/chip-8-emulator.dir/src/chip8.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/chip-8-emulator.dir/src/chip8.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/chip8.c -o CMakeFiles/chip-8-emulator.dir/src/chip8.c.s
+
 CMakeFiles/chip-8-emulator.dir/src/main.c.o: CMakeFiles/chip-8-emulator.dir/flags.make
 CMakeFiles/chip-8-emulator.dir/src/main.c.o: /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/main.c
 CMakeFiles/chip-8-emulator.dir/src/main.c.o: CMakeFiles/chip-8-emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/chip-8-emulator.dir/src/main.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/chip-8-emulator.dir/src/main.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/chip-8-emulator.dir/src/main.c.o -MF CMakeFiles/chip-8-emulator.dir/src/main.c.o.d -o CMakeFiles/chip-8-emulator.dir/src/main.c.o -c /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/main.c
 
 CMakeFiles/chip-8-emulator.dir/src/main.c.i: cmake_force
@@ -89,7 +103,7 @@ CMakeFiles/chip-8-emulator.dir/src/main.c.s: cmake_force
 CMakeFiles/chip-8-emulator.dir/src/stack.c.o: CMakeFiles/chip-8-emulator.dir/flags.make
 CMakeFiles/chip-8-emulator.dir/src/stack.c.o: /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.c
 CMakeFiles/chip-8-emulator.dir/src/stack.c.o: CMakeFiles/chip-8-emulator.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/chip-8-emulator.dir/src/stack.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/chip-8-emulator.dir/src/stack.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/chip-8-emulator.dir/src/stack.c.o -MF CMakeFiles/chip-8-emulator.dir/src/stack.c.o.d -o CMakeFiles/chip-8-emulator.dir/src/stack.c.o -c /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.c
 
 CMakeFiles/chip-8-emulator.dir/src/stack.c.i: cmake_force
@@ -102,19 +116,21 @@ CMakeFiles/chip-8-emulator.dir/src/stack.c.s: cmake_force
 
 # Object files for target chip-8-emulator
 chip__8__emulator_OBJECTS = \
+"CMakeFiles/chip-8-emulator.dir/src/chip8.c.o" \
 "CMakeFiles/chip-8-emulator.dir/src/main.c.o" \
 "CMakeFiles/chip-8-emulator.dir/src/stack.c.o"
 
 # External object files for target chip-8-emulator
 chip__8__emulator_EXTERNAL_OBJECTS =
 
+chip-8-emulator: CMakeFiles/chip-8-emulator.dir/src/chip8.c.o
 chip-8-emulator: CMakeFiles/chip-8-emulator.dir/src/main.c.o
 chip-8-emulator: CMakeFiles/chip-8-emulator.dir/src/stack.c.o
 chip-8-emulator: CMakeFiles/chip-8-emulator.dir/build.make
 chip-8-emulator: CMakeFiles/chip-8-emulator.dir/compiler_depend.ts
-chip-8-emulator: /usr/lib/libSDL3.so.0.2.26
+chip-8-emulator: /usr/lib/libSDL3.so.0.2.28
 chip-8-emulator: CMakeFiles/chip-8-emulator.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable chip-8-emulator"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/tj/workspace/github.com/TJ-R/chip-8-emulator/builds/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable chip-8-emulator"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chip-8-emulator.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

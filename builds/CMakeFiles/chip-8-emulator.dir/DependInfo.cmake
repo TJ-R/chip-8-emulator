@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/chip8.c" "CMakeFiles/chip-8-emulator.dir/src/chip8.c.o" "gcc" "CMakeFiles/chip-8-emulator.dir/src/chip8.c.o.d"
   "/home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/main.c" "CMakeFiles/chip-8-emulator.dir/src/main.c.o" "gcc" "CMakeFiles/chip-8-emulator.dir/src/main.c.o.d"
   "/home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.c" "CMakeFiles/chip-8-emulator.dir/src/stack.c.o" "gcc" "CMakeFiles/chip-8-emulator.dir/src/stack.c.o.d"
   "" "chip-8-emulator" "gcc" "CMakeFiles/chip-8-emulator.dir/link.d"

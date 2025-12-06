@@ -129,6 +129,30 @@ chip-8-emulator/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chip-8-emulator.dir/build.make CMakeFiles/chip-8-emulator.dir/build
 .PHONY : chip-8-emulator/fast
 
+src/chip8.o: src/chip8.c.o
+.PHONY : src/chip8.o
+
+# target to build an object file
+src/chip8.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chip-8-emulator.dir/build.make CMakeFiles/chip-8-emulator.dir/src/chip8.c.o
+.PHONY : src/chip8.c.o
+
+src/chip8.i: src/chip8.c.i
+.PHONY : src/chip8.i
+
+# target to preprocess a source file
+src/chip8.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chip-8-emulator.dir/build.make CMakeFiles/chip-8-emulator.dir/src/chip8.c.i
+.PHONY : src/chip8.c.i
+
+src/chip8.s: src/chip8.c.s
+.PHONY : src/chip8.s
+
+# target to generate assembly for a file
+src/chip8.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chip-8-emulator.dir/build.make CMakeFiles/chip-8-emulator.dir/src/chip8.c.s
+.PHONY : src/chip8.c.s
+
 src/main.o: src/main.c.o
 .PHONY : src/main.o
 
@@ -186,6 +210,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... chip-8-emulator"
+	@echo "... src/chip8.o"
+	@echo "... src/chip8.i"
+	@echo "... src/chip8.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
