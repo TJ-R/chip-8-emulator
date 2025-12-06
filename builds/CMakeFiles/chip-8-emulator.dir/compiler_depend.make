@@ -109,6 +109,42 @@ CMakeFiles/chip-8-emulator.dir/src/main.c.o: /home/tj/workspace/github.com/TJ-R/
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdint.h
 
+CMakeFiles/chip-8-emulator.dir/src/stack.c.o: /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.c \
+  /home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.h \
+  /usr/include/bits/floatn-common.h \
+  /usr/include/bits/floatn.h \
+  /usr/include/bits/libc-header-start.h \
+  /usr/include/bits/long-double.h \
+  /usr/include/bits/stdint-intn.h \
+  /usr/include/bits/stdint-least.h \
+  /usr/include/bits/stdint-uintn.h \
+  /usr/include/bits/stdio_lim.h \
+  /usr/include/bits/time64.h \
+  /usr/include/bits/timesize.h \
+  /usr/include/bits/types.h \
+  /usr/include/bits/types/FILE.h \
+  /usr/include/bits/types/__FILE.h \
+  /usr/include/bits/types/__fpos64_t.h \
+  /usr/include/bits/types/__fpos_t.h \
+  /usr/include/bits/types/__mbstate_t.h \
+  /usr/include/bits/types/cookie_io_functions_t.h \
+  /usr/include/bits/types/struct_FILE.h \
+  /usr/include/bits/typesizes.h \
+  /usr/include/bits/wchar.h \
+  /usr/include/bits/wordsize.h \
+  /usr/include/features-time64.h \
+  /usr/include/features.h \
+  /usr/include/gnu/stubs-64.h \
+  /usr/include/gnu/stubs.h \
+  /usr/include/stdc-predef.h \
+  /usr/include/stdint.h \
+  /usr/include/stdio.h \
+  /usr/include/sys/cdefs.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdbool.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdint.h
+
 chip-8-emulator: /usr/lib/Scrt1.o \
   /usr/lib/crti.o \
   /usr/lib/crtn.o \
@@ -123,8 +159,11 @@ chip-8-emulator: /usr/lib/Scrt1.o \
   /usr/lib/libc.so.6 \
   /usr/lib/libc_nonshared.a \
   /usr/lib/libm.so.6 \
-  CMakeFiles/chip-8-emulator.dir/src/main.c.o
+  CMakeFiles/chip-8-emulator.dir/src/main.c.o \
+  CMakeFiles/chip-8-emulator.dir/src/stack.c.o
 
+
+CMakeFiles/chip-8-emulator.dir/src/stack.c.o:
 
 /usr/lib/libm.so.6:
 
@@ -191,6 +230,8 @@ chip-8-emulator: /usr/lib/Scrt1.o \
 /usr/include/gnu/stubs-64.h:
 
 /usr/include/SDL3/SDL_video.h:
+
+/home/tj/workspace/github.com/TJ-R/chip-8-emulator/src/stack.c:
 
 /usr/include/wchar.h:
 
