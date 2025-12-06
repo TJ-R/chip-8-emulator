@@ -1,3 +1,4 @@
+#include "chip8.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
@@ -43,7 +44,19 @@ int main()
   SDL_Event e;
 
   // Start loading the chip-8 stuff
-  //
+
+  Chip8 chip8;
+  printf("Just before init.\n");
+  init(&chip8);
+  if (load_rom(&chip8, "../programs/IBM Logo.ch8"))
+  {
+    printf("ROM loaded successfully\n");
+    printf("Waiting to quit...\n");
+  }
+  else
+  {
+    running = false;
+  }
 
   while (running)
   {
