@@ -1,4 +1,11 @@
 #include "chip8.h"
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_oldnames.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_video.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -97,6 +104,67 @@ uint16_t fetch_opcode(Chip8 *chip8)
   return opcode;
 }
 
+int setup_graphics(Chip8 *chip8)
+{
+  if (!SDL_Init(SDL_INIT_VIDEO))
+  {
+    fprintf(stderr, "SDL Init error: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  chip8->win =
+      SDL_CreateWindow("Chip_8_Emulator", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+  if (!chip8->win)
+  {
+    fprintf(stderr, "Window error: %s\n", SDL_GetError());
+  }
+
+  SDL_ShowWindow(chip8->win);
+  SDL_MaximizeWindow(chip8->win);
+
+  chip8->renderer = SDL_CreateRenderer(chip8->win, NULL);
+  if (!chip8->renderer)
+  {
+    fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
+    SDL_DestroyWindow(chip8->win);
+    SDL_Quit();
+    return 1;
+  }
+
+  // Drawing the initial frame so that wayland will display the
+  // the window
+  SDL_SetRenderDrawColor(chip8->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(chip8->renderer);
+  SDL_RenderPresent(chip8->renderer);
+
+  SDL_Texture *texture = SDL_CreateTexture(
+      chip8->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET,
+      WINDOW_WIDTH / 10, WINDOW_HEIGHT / 10);
+
+  SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+
+  SDL_RenderTexture(chip8->renderer, texture, NULL, NULL);
+
+  int running = 1;
+  SDL_Event e;
+
+  while (running)
+  {
+    while (SDL_PollEvent(&e))
+    {
+      if (e.type == SDL_EVENT_QUIT)
+        running = 0;
+    }
+
+    SDL_Delay(16);
+  }
+
+  SDL_DestroyWindow(chip8->win);
+  SDL_Quit();
+  return 0;
+}
+
+// int destroy_graphics() {}
 int cpu_loop(Chip8 *chip8)
 {
   uint16_t opcode = fetch_opcode(chip8);
@@ -128,8 +196,10 @@ int cpu_loop(Chip8 *chip8)
     break;
 
   case 0x1:
+    chip8->pc = NNN;
     break;
   case 0x2:
+    push(&chip8->stack, NNN);
     break;
   case 0x3:
     break;
@@ -138,20 +208,31 @@ int cpu_loop(Chip8 *chip8)
   case 0x5:
     break;
   case 0x6:
+    chip8->registers[X] = NN;
     break;
   case 0x7:
+    chip8->registers[X] = NN + chip8->registers[X];
     break;
   case 0x8:
     break;
   case 0x9:
     break;
   case 0xA:
+    chip8->indexRegister = NNN;
     break;
   case 0xB:
     break;
   case 0xC:
     break;
-  case 0xD:
+  case 0xD:;
+    uint8_t x_cor = chip8->registers[X];
+    uint8_t y_cor = chip8->registers[Y];
+    chip8->registers[0xF] = 0;
+
+    for (int i = 0; i < N; i++)
+    {
+      uint8_t sprite_data = chip8->memory[chip8->indexRegister + N];
+    }
     break;
   case 0xE:
     break;
