@@ -25,6 +25,12 @@ void init(Chip8 *chip8)
   // Sets block of memeory to all 0s
   memset(chip8->memory, 0, CHIP8_MEMORY_SIZE);
   memset(chip8->registers, 0, 16);
+  memset(chip8->gfx, 0xFF000000, DISPLAY_HEIGHT * DISPLAY_WIDTH);
+
+  for (int i = 0; i < DISPLAY_HEIGHT * DISPLAY_WIDTH; i++)
+  {
+    chip8->gfx[i] = 0xFF000000;
+  }
 
   // Loading the fonts into memory
   // If need explination of how these are fonts
@@ -265,15 +271,13 @@ int cpu_cycle(Chip8 *chip8)
 
         if (sprite_on && pixel_on)
         {
-          printf("Pixel is on so turning it off\n");
-          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0x0000;
+          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0xFF000000;
           chip8->registers[0xF] = 1;
           chip8->draw_flag = true;
         }
         else if (sprite_on && !pixel_on)
         {
-          printf("Pixel off so turning on\n");
-          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0xFFFF;
+          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0xFFFFFFFF;
           chip8->draw_flag = true;
         }
       }
@@ -294,7 +298,9 @@ int draw_display(Chip8 *chip8)
 {
   printf("Drawing...\n");
   SDL_UpdateTexture(chip8->texture, NULL, chip8->gfx, 64 * 4);
+  SDL_RenderClear(chip8->renderer);
   SDL_RenderTexture(chip8->renderer, chip8->texture, NULL, NULL);
+  SDL_RenderPresent(chip8->renderer);
   chip8->draw_flag = false;
 
   return 0;
