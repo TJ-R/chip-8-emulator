@@ -12,13 +12,19 @@
 
 void init(Chip8 *chip8)
 {
+  chip8->draw_flag = false;
+
   // Sets the starting locating
   // to 0x200 since 0x000 to 0x1FF
   // was generally reserved for the interpreter
   chip8->pc = CHIP8_START_ADDRESS;
+  chip8->indexRegister = 0;
+  chip8->soundTimer = 0;
+  chip8->delayTimer = 0;
 
   // Sets block of memeory to all 0s
   memset(chip8->memory, 0, CHIP8_MEMORY_SIZE);
+  memset(chip8->registers, 0, 16);
 
   // Loading the fonts into memory
   // If need explination of how these are fonts
@@ -112,8 +118,8 @@ int setup_graphics(Chip8 *chip8)
     return 1;
   }
 
-  chip8->win =
-      SDL_CreateWindow("Chip_8_Emulator", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+  chip8->win = SDL_CreateWindow("Chip_8_Emulator", DISPLAY_WIDTH * 10,
+                                DISPLAY_HEIGHT * 10, 0);
   if (!chip8->win)
   {
     fprintf(stderr, "Window error: %s\n", SDL_GetError());
@@ -137,35 +143,17 @@ int setup_graphics(Chip8 *chip8)
   SDL_RenderClear(chip8->renderer);
   SDL_RenderPresent(chip8->renderer);
 
-  SDL_Texture *texture = SDL_CreateTexture(
-      chip8->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET,
-      WINDOW_WIDTH / 10, WINDOW_HEIGHT / 10);
+  chip8->texture = SDL_CreateTexture(chip8->renderer, SDL_PIXELFORMAT_ARGB8888,
+                                     SDL_TEXTUREACCESS_STREAMING, DISPLAY_WIDTH,
+                                     DISPLAY_HEIGHT);
 
-  SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+  SDL_SetTextureScaleMode(chip8->texture, SDL_SCALEMODE_NEAREST);
 
-  SDL_RenderTexture(chip8->renderer, texture, NULL, NULL);
-
-  int running = 1;
-  SDL_Event e;
-
-  while (running)
-  {
-    while (SDL_PollEvent(&e))
-    {
-      if (e.type == SDL_EVENT_QUIT)
-        running = 0;
-    }
-
-    SDL_Delay(16);
-  }
-
-  SDL_DestroyWindow(chip8->win);
-  SDL_Quit();
   return 0;
 }
 
 // int destroy_graphics() {}
-int cpu_loop(Chip8 *chip8)
+int cpu_cycle(Chip8 *chip8)
 {
   uint16_t opcode = fetch_opcode(chip8);
   uint8_t opfamily = (opcode & 0xF000) >> 12;
@@ -175,11 +163,14 @@ int cpu_loop(Chip8 *chip8)
   uint8_t NN = (opcode & 0x00FF);
   uint16_t NNN = (opcode & 0x0FFF);
 
+  printf("Opcode: %X\n", opcode);
+
   switch (opfamily)
   {
   case 0x0:
     switch (N)
     {
+
     case 0x0:
       // Clear the display
       break;
@@ -198,47 +189,113 @@ int cpu_loop(Chip8 *chip8)
   case 0x1:
     chip8->pc = NNN;
     break;
+
   case 0x2:
     push(&chip8->stack, NNN);
     break;
+
   case 0x3:
     break;
+
   case 0x4:
     break;
+
   case 0x5:
     break;
+
   case 0x6:
     chip8->registers[X] = NN;
     break;
+
   case 0x7:
     chip8->registers[X] = NN + chip8->registers[X];
     break;
+
   case 0x8:
     break;
+
   case 0x9:
     break;
+
   case 0xA:
     chip8->indexRegister = NNN;
+    printf("Index Register set to %x\n", NNN);
     break;
+
   case 0xB:
     break;
+
   case 0xC:
     break;
+
   case 0xD:;
-    uint8_t x_cor = chip8->registers[X];
-    uint8_t y_cor = chip8->registers[Y];
+    printf("Draw screen opcode...\n");
+    uint8_t x_cor =
+        chip8->registers[X] & 63; // Should keep all indexs from 0 -> 63
+    uint8_t y_cor =
+        chip8->registers[Y] & 31; // Should keep all indexs from 1 -> 31
     chip8->registers[0xF] = 0;
 
     for (int i = 0; i < N; i++)
     {
-      uint8_t sprite_data = chip8->memory[chip8->indexRegister + N];
+      // This gets the sprite data that we are going to load into
+      // the gfx array before it gets put into the texture and stretched
+      uint8_t sprite_data = chip8->memory[chip8->indexRegister + i];
+
+      // Checking each bit from most to least (left to right) siginicant
+      for (int j = 0; j < 8; j++)
+      {
+        if (y_cor + j > 63)
+        {
+          break;
+        }
+        uint32_t pixel =
+            chip8
+                ->gfx[(y_cor + i) * 64 + (x_cor + j)]; // info for current pixel
+
+        // Starting the XOR
+        // 0 0 => 0
+        // 1 0 => 1
+        // 0 1 => 1
+        // 1 1 => 0
+        bool sprite_on =
+            (sprite_data >> (7 - j) & 0x01) == 1; // Should be either 1 or 0
+        //
+        bool pixel_on = (pixel == 0xFFFF) ? true : false;
+
+        if (sprite_on && pixel_on)
+        {
+          printf("Pixel is on so turning it off\n");
+          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0x0000;
+          chip8->registers[0xF] = 1;
+          chip8->draw_flag = true;
+        }
+        else if (sprite_on && !pixel_on)
+        {
+          printf("Pixel off so turning on\n");
+          chip8->gfx[(y_cor + i) * 64 + (x_cor + j)] = 0xFFFF;
+          chip8->draw_flag = true;
+        }
+      }
     }
     break;
+
   case 0xE:
     break;
+
   case 0xF:
     break;
   }
 
   return 1;
+}
+
+int draw_display(Chip8 *chip8)
+{
+  printf("Drawing...\n");
+  SDL_UpdateTexture(chip8->texture, NULL, chip8->gfx, 64 * 4);
+  SDL_RenderTexture(chip8->renderer, chip8->texture, NULL, NULL);
+  chip8->draw_flag = false;
+
+  return 0;
 }
