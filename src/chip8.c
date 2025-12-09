@@ -179,6 +179,14 @@ int cpu_cycle(Chip8 *chip8)
 
     case 0x0:
       // Clear the display
+      for (int i = 0; i < DISPLAY_HEIGHT * DISPLAY_WIDTH; i++)
+      {
+        chip8->gfx[i] = 0xFF000000;
+      }
+      SDL_RenderClear(chip8->renderer);
+      SDL_RenderTexture(chip8->renderer, chip8->texture, NULL, NULL);
+      SDL_RenderPresent(chip8->renderer);
+
       break;
 
     // This opcode 0x00EE is returning from a subroutine
@@ -201,12 +209,24 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0x3:
+    if (chip8->registers[X] == NN)
+    {
+      chip8->pc = chip8->pc + 2;
+    }
     break;
 
   case 0x4:
+    if (chip8->registers[X] != NN)
+    {
+      chip8->pc = chip8->pc + 2;
+    }
     break;
 
   case 0x5:
+    if (chip8->registers[X] == chip8->registers[Y])
+    {
+      chip8->pc = chip8->pc + 2;
+    }
     break;
 
   case 0x6:
@@ -218,9 +238,59 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0x8:
+    switch (N)
+    {
+    case 0x0:
+      chip8->registers[X] = chip8->registers[Y];
+      break;
+    case 0x1:
+      chip8->registers[X] = chip8->registers[X] | chip8->registers[Y];
+      break;
+    case 0x2:
+      chip8->registers[X] = chip8->registers[X] & chip8->registers[Y];
+      break;
+    case 0x3:
+      chip8->registers[X] = chip8->registers[X] ^ chip8->registers[Y];
+      break;
+    case 0x4:
+      // Would overflow since it means Vx + Vy would > UINT8_MAX
+      if (chip8->registers[X] > UINT8_MAX - chip8->registers[Y])
+      {
+        chip8->registers[0xF] = 1;
+      }
+      else
+      {
+        chip8->registers[0xF] = 0;
+      }
+      chip8->registers[X] = chip8->registers[X] + chip8->registers[Y];
+      break;
+    case 0x5:
+      if (chip8->registers[X] > chip8->registers[Y])
+      {
+        chip8->registers[0xF] = 1;
+      }
+      else
+      {
+        chip8->registers[0xF] = 0;
+      }
+
+      chip8->registers[X] = chip8->registers[X] - chip8->registers[Y];
+      break;
+    case 0x6:
+      break;
+    case 0x7:
+      break;
+    case 0xE:
+      break;
+    }
+
     break;
 
   case 0x9:
+    if (chip8->registers[X] != chip8->registers[Y])
+    {
+      chip8->pc = chip8->pc + 2;
+    }
     break;
 
   case 0xA:
@@ -229,6 +299,7 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0xB:
+    chip8->pc = chip8->registers[0] + NNN;
     break;
 
   case 0xC:
