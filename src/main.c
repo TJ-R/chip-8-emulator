@@ -61,6 +61,9 @@ int main()
     {
       draw_display(&chip8);
     }
+
+    chip8.delayTimer -= 1;
+    chip8.soundTimer -= 1;
     SDL_Delay(16);
   }
 

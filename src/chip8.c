@@ -4,10 +4,12 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void init(Chip8 *chip8)
@@ -211,21 +213,21 @@ int cpu_cycle(Chip8 *chip8)
   case 0x3:
     if (chip8->registers[X] == NN)
     {
-      chip8->pc = chip8->pc + 2;
+      chip8->pc = chip8->pc + 4;
     }
     break;
 
   case 0x4:
     if (chip8->registers[X] != NN)
     {
-      chip8->pc = chip8->pc + 2;
+      chip8->pc = chip8->pc + 4;
     }
     break;
 
   case 0x5:
     if (chip8->registers[X] == chip8->registers[Y])
     {
-      chip8->pc = chip8->pc + 2;
+      chip8->pc = chip8->pc + 4;
     }
     break;
 
@@ -277,10 +279,24 @@ int cpu_cycle(Chip8 *chip8)
       chip8->registers[X] = chip8->registers[X] - chip8->registers[Y];
       break;
     case 0x6:
+      chip8->registers[0xF] = chip8->registers[X] & 0x00000001;
+      chip8->registers[X] = chip8->registers[X] >> 1;
       break;
     case 0x7:
+      if (chip8->registers[Y] > chip8->registers[X])
+      {
+        chip8->registers[0xF] = 1;
+      }
+      else
+      {
+        chip8->registers[0xF] = 0;
+      }
+
+      chip8->registers[X] = chip8->registers[Y] - chip8->registers[X];
       break;
     case 0xE:
+      chip8->registers[0xF] = chip8->registers[X] & 0x10000000;
+      chip8->registers[0xF] = chip8->registers[X] << 1;
       break;
     }
 
@@ -289,7 +305,7 @@ int cpu_cycle(Chip8 *chip8)
   case 0x9:
     if (chip8->registers[X] != chip8->registers[Y])
     {
-      chip8->pc = chip8->pc + 2;
+      chip8->pc = chip8->pc + 4;
     }
     break;
 
@@ -303,6 +319,7 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0xC:
+    chip8->registers[X] = ((rand() % 255) + 1) & NN;
     break;
 
   case 0xD:;
@@ -356,9 +373,98 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0xE:
+    switch (NN)
+    {
+    case 0x9E:; // Might need to fix this
+      SDL_Event event;
+      while (SDL_PollEvent(&event))
+      {
+        if (SDL_EVENT_KEY_DOWN)
+        {
+          SDL_Scancode scancode = event.key.scancode;
+          if (scancode == (chip8->registers[X] & 0x0F))
+          {
+            chip8->pc = chip8->pc + 4;
+          }
+        }
+        break;
+      }
+      break;
+
+    case 0xA1:; // Might need to fix this
+      SDL_Event e;
+      while (SDL_PollEvent(&e))
+      {
+        if (SDL_EVENT_KEY_DOWN)
+        {
+          SDL_Scancode scancode = event.key.scancode;
+          if (scancode == (chip8->registers[X] & 0x0F))
+          {
+            break;
+          }
+        }
+
+        chip8->pc = chip8->pc + 4;
+        break;
+      }
+      break;
+    }
     break;
 
   case 0xF:
+    switch (NN)
+    {
+    case 0x07:
+      chip8->registers[X] = chip8->delayTimer;
+      break;
+    case 0x0A:;
+      SDL_Event event;
+      while (SDL_PollEvent(&event))
+      {
+        if (SDL_EVENT_KEY_DOWN)
+        {
+          SDL_Scancode scancode = event.key.scancode;
+          chip8->registers[X] = scancode;
+          break;
+        }
+      }
+
+      break;
+    case 0x15:
+      chip8->delayTimer = chip8->registers[X];
+      break;
+    case 0x18:
+      chip8->soundTimer = chip8->registers[X];
+      break;
+    case 0x1E:
+      chip8->indexRegister = chip8->indexRegister + chip8->registers[X];
+      break;
+    case 0x29:
+      chip8->indexRegister = chip8->memory[chip8->registers[X]];
+      break;
+    case 0x33:;
+      int dividedNumber = (int)chip8->registers[X];
+      chip8->memory[chip8->indexRegister + 2] = dividedNumber % 10;
+
+      dividedNumber = dividedNumber / 10;
+      chip8->memory[chip8->indexRegister + 1] = dividedNumber % 10;
+
+      dividedNumber = dividedNumber / 10;
+      chip8->memory[chip8->indexRegister] = dividedNumber % 10;
+      break;
+    case 0x55:
+      for (int i = 0; i < 16; i++)
+      {
+        chip8->memory[chip8->indexRegister + i] = chip8->registers[i];
+      }
+      break;
+    case 0x65:
+      for (int i = 0; i < 16; i++)
+      {
+        chip8->registers[i] = chip8->memory[chip8->indexRegister + i];
+      }
+      break;
+    }
     break;
   }
 
