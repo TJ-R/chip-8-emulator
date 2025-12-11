@@ -126,8 +126,8 @@ int setup_graphics(Chip8 *chip8)
     return 1;
   }
 
-  chip8->win = SDL_CreateWindow("Chip_8_Emulator", DISPLAY_WIDTH * 10,
-                                DISPLAY_HEIGHT * 10, 0);
+  chip8->win = SDL_CreateWindow("Chip_8_Emulator", DISPLAY_WIDTH * 20,
+                                DISPLAY_HEIGHT * 20, 0);
   if (!chip8->win)
   {
     fprintf(stderr, "Window error: %s\n", SDL_GetError());
@@ -169,9 +169,9 @@ int cpu_cycle(Chip8 *chip8)
   uint8_t Y = (opcode & 0x00F0) >> 4;
   uint8_t N = (opcode & 0x000F);
   uint8_t NN = (opcode & 0x00FF);
-  uint16_t NNN = (opcode & 0x0FFF);
+  uint16_t NNN = (opcode & 0x0FFF); //>> 4;
 
-  printf("Opcode: %X\n", opcode);
+  printf("Opcode: %X\n\n", opcode);
 
   switch (opfamily)
   {
@@ -207,27 +207,29 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0x2:
-    push(&chip8->stack, NNN);
+    push(&chip8->stack, chip8->pc);
+    chip8->pc = NNN;
     break;
 
   case 0x3:
     if (chip8->registers[X] == NN)
     {
-      chip8->pc = chip8->pc + 4;
+      chip8->pc = chip8->pc + 2;
     }
     break;
 
   case 0x4:
+    printf("--------------------\n");
     if (chip8->registers[X] != NN)
     {
-      chip8->pc = chip8->pc + 4;
+      chip8->pc = chip8->pc + 2;
     }
     break;
 
   case 0x5:
     if (chip8->registers[X] == chip8->registers[Y])
     {
-      chip8->pc = chip8->pc + 4;
+      chip8->pc = chip8->pc + 2;
     }
     break;
 
@@ -279,8 +281,8 @@ int cpu_cycle(Chip8 *chip8)
       chip8->registers[X] = chip8->registers[X] - chip8->registers[Y];
       break;
     case 0x6:
-      chip8->registers[0xF] = chip8->registers[X] & 0x00000001;
-      chip8->registers[X] = chip8->registers[X] >> 1;
+      chip8->registers[0xF] = chip8->registers[Y] & 0x01;
+      chip8->registers[X] = chip8->registers[Y] >> 1;
       break;
     case 0x7:
       if (chip8->registers[Y] > chip8->registers[X])
@@ -295,8 +297,8 @@ int cpu_cycle(Chip8 *chip8)
       chip8->registers[X] = chip8->registers[Y] - chip8->registers[X];
       break;
     case 0xE:
-      chip8->registers[0xF] = chip8->registers[X] & 0x10000000;
-      chip8->registers[0xF] = chip8->registers[X] << 1;
+      chip8->registers[0xF] = chip8->registers[Y] & 0x80;
+      chip8->registers[X] = chip8->registers[Y] << 1;
       break;
     }
 
@@ -305,13 +307,12 @@ int cpu_cycle(Chip8 *chip8)
   case 0x9:
     if (chip8->registers[X] != chip8->registers[Y])
     {
-      chip8->pc = chip8->pc + 4;
+      chip8->pc = chip8->pc + 2;
     }
     break;
 
   case 0xA:
     chip8->indexRegister = NNN;
-    printf("Index Register set to %x\n", NNN);
     break;
 
   case 0xB:
@@ -323,7 +324,6 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0xD:;
-    printf("Draw screen opcode...\n");
     uint8_t x_cor =
         chip8->registers[X] & 63; // Should keep all indexs from 0 -> 63
     uint8_t y_cor =
@@ -451,15 +451,16 @@ int cpu_cycle(Chip8 *chip8)
 
       dividedNumber = dividedNumber / 10;
       chip8->memory[chip8->indexRegister] = dividedNumber % 10;
+
       break;
     case 0x55:
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < X + 1; i++)
       {
         chip8->memory[chip8->indexRegister + i] = chip8->registers[i];
       }
       break;
     case 0x65:
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < X + 1; i++)
       {
         chip8->registers[i] = chip8->memory[chip8->indexRegister + i];
       }
