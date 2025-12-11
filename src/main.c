@@ -17,7 +17,7 @@ int main()
   init(&chip8);
   setup_graphics(&chip8);
 
-  if (load_rom(&chip8, "../programs/Pong (alt).ch8"))
+  if (load_rom(&chip8, "../programs/5-quirks.ch8"))
   {
     printf("ROM loaded successfully\n");
     printf("Waiting to quit...\n");

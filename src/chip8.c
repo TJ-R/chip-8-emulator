@@ -219,7 +219,6 @@ int cpu_cycle(Chip8 *chip8)
     break;
 
   case 0x4:
-    printf("--------------------\n");
     if (chip8->registers[X] != NN)
     {
       chip8->pc = chip8->pc + 2;
@@ -257,49 +256,57 @@ int cpu_cycle(Chip8 *chip8)
       chip8->registers[X] = chip8->registers[X] ^ chip8->registers[Y];
       break;
     case 0x4:
+    {
+      uint8_t flag = 0;
       // Would overflow since it means Vx + Vy would > UINT8_MAX
       if (chip8->registers[X] > UINT8_MAX - chip8->registers[Y])
       {
-        chip8->registers[0xF] = 1;
+        flag = 0x01;
       }
       else
       {
-        chip8->registers[0xF] = 0;
+        flag = 0x00;
       }
       chip8->registers[X] = chip8->registers[X] + chip8->registers[Y];
+      chip8->registers[0xF] = flag;
       break;
+    }
     case 0x5:
-      if (chip8->registers[X] > chip8->registers[Y])
+    {
+      uint8_t flag = 0;
+      if (chip8->registers[X] >= chip8->registers[Y])
       {
-        chip8->registers[0xF] = 1;
+        flag = 1;
       }
       else
       {
-        chip8->registers[0xF] = 0;
+        flag = 0;
       }
-
       chip8->registers[X] = chip8->registers[X] - chip8->registers[Y];
+      chip8->registers[0xF] = flag;
       break;
+    }
     case 0x6:
-      chip8->registers[0xF] = chip8->registers[Y] & 0x01;
+    {
+      uint8_t flag = 0;
+      flag = chip8->registers[Y] & 0x01;
       chip8->registers[X] = chip8->registers[Y] >> 1;
+      chip8->registers[0xF] = flag;
       break;
+    }
     case 0x7:
-      if (chip8->registers[Y] > chip8->registers[X])
-      {
-        chip8->registers[0xF] = 1;
-      }
-      else
-      {
-        chip8->registers[0xF] = 0;
-      }
-
       chip8->registers[X] = chip8->registers[Y] - chip8->registers[X];
+      chip8->registers[0xF] =
+          (chip8->registers[Y] >= chip8->registers[X]) ? 1 : 0;
       break;
     case 0xE:
-      chip8->registers[0xF] = chip8->registers[Y] & 0x80;
+    {
+      uint8_t flag = 0;
+      flag = (chip8->registers[Y] & 0x80) >> 7;
       chip8->registers[X] = chip8->registers[Y] << 1;
+      chip8->registers[0xF] = flag;
       break;
+    }
     }
 
     break;
