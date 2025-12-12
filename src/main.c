@@ -18,7 +18,7 @@ int main()
   init(&chip8);
   setup_graphics(&chip8);
 
-  if (load_rom(&chip8, "../programs/6-keypad.ch8"))
+  if (load_rom(&chip8, "../programs/Tetris [Fran Dachille, 1991].ch8"))
   {
     printf("ROM loaded successfully\n");
     printf("Waiting to quit...\n");
@@ -27,209 +27,67 @@ int main()
   // This will be the endless cycle for the program
   // Need to move some of the code from setup_graphics to here
   // and then break that out into some other functions
-  SDL_Event e;
   for (;;)
   {
+    // Scan inputs
+    scan_keys(&chip8);
 
-    while (SDL_PollEvent(&e) != 0)
+    if (chip8.cpu_paused)
     {
-      SDL_Scancode scancode = e.key.scancode;
-
-      if (e.type == SDL_EVENT_QUIT)
+      // Waiting for release frame
+      if (chip8.pressedKey != UINT8_MAX)
       {
-        printf("Should be exiting...\n");
-        SDL_DestroyWindow(chip8.win);
-        SDL_Quit();
-
-        return 0;
-      }
-
-      if (e.type == SDL_EVENT_KEY_DOWN)
-      {
-        if (scancode == SDL_SCANCODE_ESCAPE)
+        if (!chip8.keys[chip8.pressedKey])
         {
-          printf("ESC key press...\n");
-          printf("Should be exiting...\n");
-          SDL_DestroyWindow(chip8.win);
-          SDL_Quit();
-          return 0;
-        }
-        else if (scancode == SDL_SCANCODE_1)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x01] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_2)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x02] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_3)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x03] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_4)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0C] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_Q)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x04] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_W)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x05] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_E)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x06] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_R)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0D] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_A)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x07] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_S)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x08] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_D)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x09] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_F)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0E] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_Z)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0A] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_X)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x00] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_C)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0B] = 1;
-        }
-        else if (scancode == SDL_SCANCODE_V)
-        {
-          chip8.key_pressed = true;
-          chip8.keys[0x0F] = 1;
+          chip8.registers[chip8.paused_register] = chip8.pressedKey;
+          chip8.cpu_paused = false;
+          chip8.pc = chip8.pc + 2;
+          chip8.pressedKey = UINT8_MAX;
         }
       }
-      else if (e.type == SDL_EVENT_KEY_UP)
+      // Waiting for clean input not previously held
+      else
       {
-        if (scancode == SDL_SCANCODE_1)
+        for (int i = 0; i < 16; i++)
         {
-          chip8.key_pressed = false;
-          chip8.keys[0x01] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_2)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x02] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_3)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x03] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_4)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0C] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_Q)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x04] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_W)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x05] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_E)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x06] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_R)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0D] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_A)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x07] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_S)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x08] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_D)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x09] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_F)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0E] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_Z)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0A] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_X)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x00] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_C)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0B] = 0;
-        }
-        else if (scancode == SDL_SCANCODE_V)
-        {
-          chip8.key_pressed = false;
-          chip8.keys[0x0F] = 0;
+          if (chip8.keys[i] && !chip8.key_was_down[i])
+          {
+            chip8.pressedKey = i;
+          }
         }
       }
     }
-
-    // Perform one operation
-    cpu_cycle(&chip8);
+    else
+    {
+      // Perform one operation
+      int cycles_per_frame = 10; // or 20, depending on CPU speed
+      for (int i = 0; i < cycles_per_frame; i++)
+      {
+        if (!chip8.cpu_paused)
+          cpu_cycle(&chip8);
+      }
+    }
 
     if (chip8.draw_flag)
     {
       draw_display(&chip8);
     }
 
-    chip8.delayTimer -= 1;
-    chip8.soundTimer -= 1;
+    if (chip8.delayTimer > 0)
+    {
+      chip8.delayTimer -= 1;
+    }
+
+    if (chip8.soundTimer > 0)
+    {
+      chip8.soundTimer -= 1;
+    }
+
+    for (int i = 0; i < 16; i++)
+    {
+      chip8.key_was_down[i] = chip8.keys[i];
+    }
+
     SDL_Delay(16);
   }
 

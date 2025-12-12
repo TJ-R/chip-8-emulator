@@ -27,8 +27,11 @@ typedef struct Chip8
   SDL_Window *win;
   SDL_Renderer *renderer;
   SDL_Texture *texture;
-  bool key_pressed;
+  bool cpu_paused; // only true when waiting for input
+  uint8_t paused_register;
+  uint8_t pressedKey;
   uint8_t keys[16];
+  uint8_t key_was_down[16];
 } Chip8;
 
 void init(Chip8 *chip8);
@@ -37,3 +40,5 @@ int load_rom(Chip8 *chip8, const char *filename);
 int cpu_cycle(Chip8 *chip8);
 int draw_display(Chip8 *chip8);
 uint16_t fetch_opcode(Chip8 *chip8);
+uint16_t current_opcode(Chip8 *chip8);
+void scan_keys(Chip8 *chip8);

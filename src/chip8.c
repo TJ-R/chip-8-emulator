@@ -24,7 +24,8 @@ void init(Chip8 *chip8)
   chip8->indexRegister = 0;
   chip8->soundTimer = 0;
   chip8->delayTimer = 0;
-  chip8->key_pressed = false;
+  chip8->cpu_paused = false;
+  chip8->pressedKey = UINT8_MAX;
 
   // Sets block of memeory to all 0s
   memset(chip8->memory, 0, CHIP8_MEMORY_SIZE);
@@ -33,7 +34,7 @@ void init(Chip8 *chip8)
   memset(chip8->gfx, 0xFF000000, DISPLAY_HEIGHT * DISPLAY_WIDTH);
 
   // This is for test 6 remove
-  chip8->memory[0x1FF] = 2;
+  // chip8->memory[0x1FF] = 3;
 
   for (int i = 0; i < DISPLAY_HEIGHT * DISPLAY_WIDTH; i++)
   {
@@ -175,6 +176,7 @@ int setup_graphics(Chip8 *chip8)
 // int destroy_graphics() {}
 int cpu_cycle(Chip8 *chip8)
 {
+  printf("CPU CYCLE CALLED\n");
   uint16_t opcode = fetch_opcode(chip8);
   uint8_t opfamily = (opcode & 0xF000) >> 12;
   uint8_t X = (opcode & 0x0F00) >> 8;
@@ -183,11 +185,7 @@ int cpu_cycle(Chip8 *chip8)
   uint8_t NN = (opcode & 0x00FF);
   uint16_t NNN = (opcode & 0x0FFF); //>> 4;
 
-  if (opfamily == 0xE && (NN == 0x9E || NN == 0xA1) ||
-      opfamily == 0xF && NN == 0x0A)
-  {
-    printf("Opcode: %X\n\n", opcode);
-  }
+  printf("Opcode: %X\n\n", opcode);
 
   switch (opfamily)
   {
@@ -378,7 +376,7 @@ int cpu_cycle(Chip8 *chip8)
         bool sprite_on =
             (sprite_data >> (7 - j) & 0x01) == 1; // Should be either 1 or 0
         //
-        bool pixel_on = (pixel == 0xFFFF) ? true : false;
+        bool pixel_on = (pixel == 0xFFFFFFFF) ? true : false;
 
         if (sprite_on && pixel_on)
         {
@@ -419,21 +417,10 @@ int cpu_cycle(Chip8 *chip8)
       chip8->registers[X] = chip8->delayTimer;
       break;
     case 0x0A:
-      if (chip8->key_pressed)
-      {
-        for (int i = 0; i < 16; i++)
-        {
-          if (chip8->keys[i])
-          {
-            chip8->registers[X] = chip8->keys[i];
-            break;
-          }
-        }
-      }
-      else
-      {
-        chip8->pc = chip8->pc - 2;
-      }
+      chip8->cpu_paused = true;
+      chip8->paused_register = X;
+      // revert moving the initial +2 to the pc till unpaused
+      chip8->pc -= 2;
       break;
     case 0x15:
       chip8->delayTimer = chip8->registers[X];
@@ -486,4 +473,166 @@ int draw_display(Chip8 *chip8)
   chip8->draw_flag = false;
 
   return 0;
+}
+
+// Refactor to use switch state and set value of keys[key] based on
+// ternary if event type was key_down or up
+void scan_keys(Chip8 *chip8)
+{
+  SDL_Event e;
+  while (SDL_PollEvent(&e) != 0)
+  {
+    SDL_Scancode scancode = e.key.scancode;
+
+    if (e.type == SDL_EVENT_QUIT)
+    {
+      printf("Should be exiting...\n");
+      SDL_DestroyWindow(chip8->win);
+      SDL_Quit();
+
+      exit(0);
+    }
+
+    if (e.type == SDL_EVENT_KEY_DOWN)
+    {
+      if (scancode == SDL_SCANCODE_ESCAPE)
+      {
+        printf("Exiting...\n");
+        SDL_DestroyWindow(chip8->win);
+        SDL_Quit();
+        exit(0);
+      }
+      else if (scancode == SDL_SCANCODE_1)
+      {
+        chip8->keys[0x01] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_2)
+      {
+        chip8->keys[0x02] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_3)
+      {
+        chip8->keys[0x03] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_4)
+      {
+        chip8->keys[0x0C] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_Q)
+      {
+        chip8->keys[0x04] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_W)
+      {
+        chip8->keys[0x05] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_E)
+      {
+        chip8->keys[0x06] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_R)
+      {
+        chip8->keys[0x0D] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_A)
+      {
+        chip8->keys[0x07] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_S)
+      {
+        chip8->keys[0x08] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_D)
+      {
+        chip8->keys[0x09] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_F)
+      {
+        chip8->keys[0x0E] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_Z)
+      {
+        chip8->keys[0x0A] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_X)
+      {
+        chip8->keys[0x00] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_C)
+      {
+        chip8->keys[0x0B] = 1;
+      }
+      else if (scancode == SDL_SCANCODE_V)
+      {
+        chip8->keys[0x0F] = 1;
+      }
+    }
+    else if (e.type == SDL_EVENT_KEY_UP)
+    {
+      if (scancode == SDL_SCANCODE_1)
+      {
+        chip8->keys[0x01] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_2)
+      {
+        chip8->keys[0x02] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_3)
+      {
+        chip8->keys[0x03] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_4)
+      {
+        chip8->keys[0x0C] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_Q)
+      {
+        chip8->keys[0x04] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_W)
+      {
+        chip8->keys[0x05] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_E)
+      {
+        chip8->keys[0x06] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_R)
+      {
+        chip8->keys[0x0D] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_A)
+      {
+        chip8->keys[0x07] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_S)
+      {
+        chip8->keys[0x08] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_D)
+      {
+        chip8->keys[0x09] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_F)
+      {
+        chip8->keys[0x0E] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_Z)
+      {
+        chip8->keys[0x0A] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_X)
+      {
+        chip8->keys[0x00] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_C)
+      {
+        chip8->keys[0x0B] = 0;
+      }
+      else if (scancode == SDL_SCANCODE_V)
+      {
+        chip8->keys[0x0F] = 0;
+      }
+    }
+  }
 }
