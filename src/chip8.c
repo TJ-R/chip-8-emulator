@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_scancode.h>
@@ -23,11 +24,16 @@ void init(Chip8 *chip8)
   chip8->indexRegister = 0;
   chip8->soundTimer = 0;
   chip8->delayTimer = 0;
+  chip8->key_pressed = false;
 
   // Sets block of memeory to all 0s
   memset(chip8->memory, 0, CHIP8_MEMORY_SIZE);
   memset(chip8->registers, 0, 16);
+  memset(chip8->keys, 0, 16);
   memset(chip8->gfx, 0xFF000000, DISPLAY_HEIGHT * DISPLAY_WIDTH);
+
+  // This is for test 6 remove
+  chip8->memory[0x1FF] = 2;
 
   for (int i = 0; i < DISPLAY_HEIGHT * DISPLAY_WIDTH; i++)
   {
@@ -126,6 +132,12 @@ int setup_graphics(Chip8 *chip8)
     return 1;
   }
 
+  if (!SDL_Init(SDL_INIT_EVENTS))
+  {
+    fprintf(stderr, "SDL Init Events erros: %s\n", SDL_GetError());
+    return 1;
+  }
+
   chip8->win = SDL_CreateWindow("Chip_8_Emulator", DISPLAY_WIDTH * 20,
                                 DISPLAY_HEIGHT * 20, 0);
   if (!chip8->win)
@@ -171,7 +183,11 @@ int cpu_cycle(Chip8 *chip8)
   uint8_t NN = (opcode & 0x00FF);
   uint16_t NNN = (opcode & 0x0FFF); //>> 4;
 
-  printf("Opcode: %X\n\n", opcode);
+  if (opfamily == 0xE && (NN == 0x9E || NN == 0xA1) ||
+      opfamily == 0xF && NN == 0x0A)
+  {
+    printf("Opcode: %X\n\n", opcode);
+  }
 
   switch (opfamily)
   {
@@ -383,59 +399,41 @@ int cpu_cycle(Chip8 *chip8)
     switch (NN)
     {
     case 0x9E:; // Might need to fix this
-      SDL_Event event;
-      while (SDL_PollEvent(&event))
+      if (chip8->keys[chip8->registers[X]])
       {
-        if (SDL_EVENT_KEY_DOWN)
-        {
-          SDL_Scancode scancode = event.key.scancode;
-          if (scancode == (chip8->registers[X] & 0x0F))
-          {
-            chip8->pc = chip8->pc + 4;
-          }
-        }
-        break;
+        chip8->pc = chip8->pc + 2;
       }
       break;
-
     case 0xA1:; // Might need to fix this
-      SDL_Event e;
-      while (SDL_PollEvent(&e))
+      if (!chip8->keys[chip8->registers[X]])
       {
-        if (SDL_EVENT_KEY_DOWN)
-        {
-          SDL_Scancode scancode = event.key.scancode;
-          if (scancode == (chip8->registers[X] & 0x0F))
-          {
-            break;
-          }
-        }
-
-        chip8->pc = chip8->pc + 4;
-        break;
+        chip8->pc = chip8->pc + 2;
       }
       break;
     }
     break;
-
   case 0xF:
     switch (NN)
     {
     case 0x07:
       chip8->registers[X] = chip8->delayTimer;
       break;
-    case 0x0A:;
-      SDL_Event event;
-      while (SDL_PollEvent(&event))
+    case 0x0A:
+      if (chip8->key_pressed)
       {
-        if (SDL_EVENT_KEY_DOWN)
+        for (int i = 0; i < 16; i++)
         {
-          SDL_Scancode scancode = event.key.scancode;
-          chip8->registers[X] = scancode;
-          break;
+          if (chip8->keys[i])
+          {
+            chip8->registers[X] = chip8->keys[i];
+            break;
+          }
         }
       }
-
+      else
+      {
+        chip8->pc = chip8->pc - 2;
+      }
       break;
     case 0x15:
       chip8->delayTimer = chip8->registers[X];
@@ -473,7 +471,6 @@ int cpu_cycle(Chip8 *chip8)
       }
       break;
     }
-    break;
   }
 
   return 1;

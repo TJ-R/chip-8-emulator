@@ -27,6 +27,8 @@ typedef struct Chip8
   SDL_Window *win;
   SDL_Renderer *renderer;
   SDL_Texture *texture;
+  bool key_pressed;
+  uint8_t keys[16];
 } Chip8;
 
 void init(Chip8 *chip8);
