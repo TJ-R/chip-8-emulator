@@ -60,7 +60,7 @@ int main()
     else
     {
       // Perform one operation
-      int cycles_per_frame = 10; // or 20, depending on CPU speed
+      int cycles_per_frame = 20; // or 20, depending on CPU speed
       for (int i = 0; i < cycles_per_frame; i++)
       {
         if (!chip8.cpu_paused)

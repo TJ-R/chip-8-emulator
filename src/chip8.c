@@ -127,15 +127,9 @@ uint16_t fetch_opcode(Chip8 *chip8)
 
 int setup_graphics(Chip8 *chip8)
 {
-  if (!SDL_Init(SDL_INIT_VIDEO))
+  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO))
   {
     fprintf(stderr, "SDL Init error: %s\n", SDL_GetError());
-    return 1;
-  }
-
-  if (!SDL_Init(SDL_INIT_EVENTS))
-  {
-    fprintf(stderr, "SDL Init Events erros: %s\n", SDL_GetError());
     return 1;
   }
 
@@ -356,11 +350,15 @@ int cpu_cycle(Chip8 *chip8)
       // This gets the sprite data that we are going to load into
       // the gfx array before it gets put into the texture and stretched
       uint8_t sprite_data = chip8->memory[chip8->indexRegister + i];
+      if (y_cor + i > 31)
+      {
+        break;
+      }
 
       // Checking each bit from most to least (left to right) siginicant
       for (int j = 0; j < 8; j++)
       {
-        if (y_cor + j > 63)
+        if (x_cor + j > 63)
         {
           break;
         }
